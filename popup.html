@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Translator AI</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/popup.css" />
+    <style>
+      body {
+        width: 550px;
+        background-color: #f8f9fa;
+      }
+      .nav-tabs .nav-link {
+        font-size: 13px;
+        font-weight: 600;
+        color: #6c757d;
+      }
+      .nav-tabs .nav-link.active {
+        color: #0d6efd;
+      }
+      .tab-content {
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        padding: 20px;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      .result-box {
+        min-height: 150px;
+        max-height: 300px;
+        overflow-y: auto;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid p-3">
+      <!-- Шапка -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">🌐 Translator AI</h5>
+        <div class="d-flex gap-2">
+          <button
+            class="btn btn-sm btn-outline-primary d-none"
+            id="backToEditBtn"
+          >
+            ⬅️ Edit Source
+          </button>
+
+          <div
+            class="d-flex align-items-center bg-light border rounded px-2"
+            style="height: 31px"
+          >
+            <small
+              class="text-muted fw-bold me-2"
+              style="font-size: 10px; text-transform: uppercase"
+              >To:</small
+            >
+            <select
+              class="form-select form-select-sm border-0 bg-transparent p-0 fw-bold"
+              id="languageSelect"
+              style="
+                width: 45px;
+                font-size: 12px;
+                cursor: pointer;
+                box-shadow: none;
+              "
+            >
+              <option value="ru" selected>RU</option>
+              <option value="en">EN</option>
+              <option value="de">DE</option>
+            </select>
+          </div>
+
+          <button
+            class="btn btn-sm btn-outline-secondary border-0"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#settingsPanel"
+          >
+            ⚙️
+          </button>
+          <button
+            class="btn btn-sm btn-outline-danger border-0"
+            id="closePopupBtn"
+          >
+            ✖
+          </button>
+        </div>
+      </div>
+
+      <!-- Настройки -->
+      <div class="collapse mb-3" id="settingsPanel">
+        <div class="card card-body bg-light p-2 border-0 shadow-sm">
+          <div id="emailInputSection">
+            <label class="form-label small fw-bold">API Email</label>
+            <div class="input-group input-group-sm mb-2">
+              <input
+                type="password"
+                class="form-control"
+                id="emailInput"
+                placeholder="your@email.com"
+              />
+              <button
+                class="btn btn-outline-secondary"
+                type="button"
+                id="toggleEmailVisibility"
+              >
+                <span id="eyeIcon">👁️</span>
+              </button>
+            </div>
+            <button class="btn btn-sm btn-success w-100" id="saveEmailBtn">
+              Save Settings
+            </button>
+          </div>
+          <div class="mb-2 d-none" id="emailDisplaySection">
+            <label class="form-label small fw-bold">Active Account</label>
+            <div class="d-flex align-items-center gap-2">
+              <div
+                class="flex-grow-1 p-1 px-2 bg-white border rounded small text-truncate"
+                id="displayedEmail"
+              ></div>
+              <button
+                class="btn btn-sm btn-outline-primary"
+                id="changeEmailBtn"
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКИ -->
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+          <button
+            class="nav-link active"
+            id="translate-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#translate-pane"
+            type="button"
+          >
+            Translate
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            id="extractor-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#extractor-pane"
+            type="button"
+          >
+            Extractor
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            id="tests-helper-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tests-helper-pane"
+            type="button"
+          >
+            Tests Helper
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            id="chat-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#chat-pane"
+            type="button"
+          >
+            Chat
+          </button>
+        </li>
+        <li class="nav-item">
+          <button
+            class="nav-link"
+            id="other-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#other-pane"
+            type="button"
+          >
+            Dictionary
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="myTabContent">
+        <!-- ТАБ 1: ПЕРЕВОДЧИК -->
+        <div
+          class="tab-pane fade show active"
+          id="translate-pane"
+          role="tabpanel"
+        >
+          <div class="work-area">
+            <div id="editorArea">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <label class="form-label fw-bold small mb-0"
+                  >Source Text:</label
+                >
+                <button
+                  class="btn btn-link btn-sm p-0 text-decoration-none"
+                  id="toggleEditSourceBtn"
+                  style="font-size: 11px"
+                >
+                  📝 Edit Raw
+                </button>
+              </div>
+              <div
+                id="sourcePreview"
+                class="result-box p-3 border rounded bg-light mb-2"
+              >
+                <div class="text-muted small">Extracting content...</div>
+              </div>
+              <textarea
+                class="form-control d-none mb-2"
+                id="mdEditor"
+                rows="7"
+                placeholder="Paste text here..."
+              ></textarea>
+            </div>
+
+            <div id="resultArea" class="d-none">
+              <label class="form-label fw-bold small"
+                >Translation Result:</label
+              >
+              <div
+                class="result-box p-3 border rounded bg-light mb-2"
+                id="resultBoxContainer"
+              >
+                <div id="translationText"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mb-2">
+            <button class="btn btn-primary w-50" id="translateBtn">
+              <span id="btnText">Translate</span>
+              <span
+                id="btnSpinner"
+                class="spinner-border spinner-border-sm ms-2 d-none"
+              ></span>
+            </button>
+            <button class="btn btn-secondary w-50" id="translateDevBtn">
+              Translate Dev
+            </button>
+          </div>
+
+          <div id="statusArea" class="d-none mt-2">
+            <div id="statusMessage" class="alert p-2 mb-0 small"></div>
+          </div>
+        </div>
+
+        <!-- ТАБ 2: EXTRACTOR -->
+        <div class="tab-pane fade" id="extractor-pane" role="tabpanel">
+          <div class="p-2">
+            <h6 class="fw-bold mb-3">🏠 Heating reporting tools</h6>
+            <p class="small text-muted">
+              Save current page content to your computer:
+            </p>
+            <div class="d-grid gap-3">
+              <button
+                id="btn-txt"
+                class="btn btn-outline-dark d-flex justify-content-between align-items-center"
+              >
+                <span>📄 Text File</span><small>.txt</small>
+              </button>
+              <button
+                id="btn-md"
+                class="btn btn-outline-primary d-flex justify-content-between align-items-center"
+              >
+                <span>Ⓜ️ Markdown</span><small>.md</small>
+              </button>
+              <button
+                id="btn-pdf"
+                class="btn btn-outline-danger d-flex justify-content-between align-items-center"
+              >
+                <span>📕 Adobe PDF</span><small>.pdf</small>
+              </button>
+              <button
+                id="btn-xls"
+                class="btn btn-success d-flex justify-content-between align-items-center"
+              >
+                <span>📗 Excel Spreadsheet</span><small>.xlsx</small>
+              </button>
+            </div>
+            <div
+              id="export-status"
+              class="mt-4 small text-center text-secondary"
+              style="min-height: 20px"
+            ></div>
+          </div>
+        </div>
+
+        <!-- ТАБ 3: Помощьник для тестов -->
+<div class="tab-pane fade" id="tests-helper-pane" role="tabpanel">
+  <div class="work-area">
+    <!-- Зона редактирования/просмотра исходника -->
+    <div id="testEditorArea">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <label class="form-label fw-bold small mb-0">Текст для анализа:</label>
+        <button class="btn btn-link btn-sm p-0 text-decoration-none" id="toggleEditTestsBtn" style="font-size: 11px">📝 Редактировать текст</button>
+      </div>
+      
+      <!-- Превью (отрендеренный текст) -->
+      <div id="testSourcePreview" class="result-box p-3 border rounded bg-light mb-2">
+        <div class="text-muted small">Извлечение контента...</div>
+      </div>
+      
+      <!-- Само поле редактирования (скрыто по умолчанию) -->
+      <textarea class="form-control d-none mb-2" id="testMdEditor" rows="20" placeholder="Вставьте текст теста здесь..."></textarea>
+    </div>
+
+    <!-- Зона результата ответов -->
+    <div id="testsResultArea" class="result-box p-3 border rounded bg-warning bg-opacity-10 mb-3 d-none position-relative" style="border-color: #ffc107 !important;">
+      <button id="copyTestsBtn" class="btn btn-sm btn-outline-secondary position-absolute" style="top: 10px; right: 10px; font-size: 11px; background: white;">
+        📋 Копировать
+      </button>
+      <div id="testsHelperText" class="pe-4"></div>
+    </div>
+
+    <button class="btn btn-warning w-100 fw-bold shadow-sm" id="solveTestsBtn">
+      <span id="testsBtnText">🔍 Решить эти тесты</span>
+      <span id="testsBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+    </button>
+  </div>
+</div>
+
+        <!-- ТАБ 4: СЛОВАРЬ -->
+        <div class="tab-pane fade" id="other-pane" role="tabpanel">
+          <div class="text-center py-5">
+            <p class="text-muted">📖 Dictionary module is under development.</p>
+          </div>
+        </div>
+
+        <!-- ТАБ 4: ЧАТ -->
+        <div class="tab-pane fade" id="chat-pane" role="tabpanel">
+          <div class="d-flex flex-column" style="height: 350px">
+            <!-- Окно сообщений -->
+            <div
+              id="chatMessages"
+              class="flex-grow-1 border rounded bg-light p-3 mb-2 overflow-auto"
+              style="font-size: 13px"
+            >
+              <div class="text-center text-muted small mt-5">
+                Начните диалог с DeepSeek AI...
+              </div>
+            </div>
+
+            <!-- Инпут и кнопка -->
+            <div class="input-group input-group-sm">
+              <textarea
+                class="form-control"
+                id="chatInput"
+                rows="1"
+                placeholder="Введите сообщение..."
+                style="resize: none"
+              ></textarea>
+              <button class="btn btn-primary" type="button" id="sendChatBtn">
+                <span
+                  id="chatBtnSpinner"
+                  class="spinner-border spinner-border-sm d-none"
+                ></span>
+                <span>Отправить</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Донаты -->
+      <hr class="mt-4" />
+      <div class="text-center">
+        <h6
+          id="donateToggle"
+          class="text-muted cursor-pointer py-2"
+          style="font-size: 13px; cursor: pointer; user-select: none"
+        >
+          Give the programmer a cup of coffee ☕
+        </h6>
+      </div>
+
+      <div id="donateContent" class="d-none mt-2 pb-4">
+        <div class="card card-body bg-light border-0 shadow-sm p-3">
+          <a
+            href="https://www.paypal.com/donate/?hosted_button_id=7LXNC6G643HJ8"
+            target="_blank"
+            class="btn btn-primary btn-sm w-100 mb-3 fw-bold"
+            >Donate via PayPal</a
+          >
+          <div class="d-flex flex-column gap-2">
+            <div
+              class="d-flex align-items-center justify-content-between bg-white p-2 border rounded"
+            >
+              <div class="overflow-hidden">
+                <small class="d-block fw-bold text-muted" style="font-size: 9px"
+                  >BTC</small
+                >
+                <div id="btc-addr" class="small text-truncate text-secondary">
+                  bc1qvtruyqhts9szkcxpxv5q70dnev6mxsna8espay
+                </div>
+              </div>
+              <button
+                class="btn btn-sm btn-outline-secondary copy-btn ms-2"
+                data-target="btc-addr"
+              >
+                Copy
+              </button>
+            </div>
+            <!-- Можно добавить другие адреса аналогично -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="lib/marked.min.js"></script>
+    <script src="lib/bootstrap.bundle.min.js"></script>
+    <script src="js/services/storage.js"></script>
+    <script src="js/services/api.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

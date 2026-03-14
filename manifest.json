@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Translator AI & Tools",
+  "version": "0.1.0",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://go-translator.shk.solutions/*",
+    "http://localhost:8080/*",
+    "http://localhost:5003/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": [
+        "lib/readability.js",
+        "lib/turndown.js",
+        "lib/xlsx.full.min.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
